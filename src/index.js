@@ -306,6 +306,78 @@ app.get('/getInformationbydate2', (req, res) => {
     });
 });
 
+app.get('/getInformationbydate3', (req, res) => {
+
+    const jsonBody = req.body;
+
+  
+
+    mongc.connect((error, client) => {
+        var mCol = client.db('mqttIOT').collection('sensor')
+        mCol.find({ deviceId: jsonBody.deviceId }).toArray(function (err, result) {
+            if (err) throw err;
+            
+
+            const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
+            let ans = [];
+            for(let i = 0; i < 23; i++) {
+                let count = 0
+                let humidity = 0
+                let temperature = 0
+                let aqi = 0
+                let co = 0
+                let no2 = 0
+                let so2 = 0
+                let pm2_5 = 0
+                let pm10 = 0
+                let location = ""
+                let time = ""
+                
+                result.forEach(snap => {
+                    const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
+                    if (snapDatetime.day() === datetime.day()) {
+                        
+                        if(snapDatetime.hour() === i) {
+                            humidity += snap.data.humidity
+                            temperature += snap.data.temperature
+                            location = snap.data.location
+                            time = snap.data.time
+                            aqi = null
+                            co += snap.data.co
+                            no2 += snap.data.no2
+                            so2 += snap.data.so2
+                            pm2_5 += snap.data.pm2_5
+                            pm10 += snap.data.pm10
+                            count++
+                        }
+                    }
+                })
+                ans.push(
+                    {
+                        humidity: humidity / count,
+                        temperature: temperature / count,
+                        location: location,
+                        time: time,
+                        aqi: aqi,
+                        polutants: {
+                            co: co / count,
+                            no2: no2 / count,
+                            so2: so2 / count,
+                            pm2_5: pm2_5 / count,
+                            pm10: pm10 / count
+                        }
+                    }
+                )
+            }
+            res.json({
+                data: ans
+            })
+            client.close();
+        });
+    });
+});
+
+
 app.get('/getinformationtimeto', (req, res) => {
 
     const jsonBody = req.body;
