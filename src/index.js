@@ -241,6 +241,9 @@ app.get('/getInformation_by_hour', (req, res) => {
         });
     });
 });
+
+
+// get average data by every hour
 app.get('/getInformationbydate2', (req, res) => {
 
     const jsonBody = req.body;
@@ -266,8 +269,8 @@ app.get('/getInformationbydate2', (req, res) => {
             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
             result.forEach(snap => {
                 const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss")
-                if (snapDatetime.isSame(datetime, 'day')) {
-                    if(snapDatetime.isSame(datetime, 'hour'))
+                if (snapDatetime.day() === datetime.day()) {
+                    if(snapDatetime.hour() === datetime.hour())
                     {
                     humidity += snap.data.humidity
                     temperature += snap.data.temperature
@@ -361,7 +364,7 @@ app.get('/getInformationbytype', (req, res) => {
             const datetime = moment(jsonBody.dateTime, "YYYY-MM-DDTHH:mm:ss")
             result.forEach(snap => {
                 const snapDatetime = moment(snap.data.time, "YYYY-MM-DDTHH:mm:ss");
-                if (snapDatetime.isSame(datetime, 'day')) {
+                if (snapDatetime.day() === datetime.day()) {
                     if (type == "humidity") {
                         jsonRes.push(
                             {
